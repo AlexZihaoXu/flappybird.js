@@ -127,7 +127,7 @@ class Bird {
             }
             if (gameRunning && !gameOver) {
                 this.y += this.deltaY;
-                this.deltaY += 0.29=85;
+                this.deltaY += 0.28;
                 this.deltaY = Math.min(12, this.deltaY);
                 if (this.y * scale > canvas.height - 33 * scale) {
                     this.y = canvas.height / scale - 33;
@@ -143,7 +143,7 @@ class Bird {
             }
             if (gameOver) {
                 this.y += this.deltaY;
-                this.deltaY += 0.31;
+                this.deltaY += 0.28;
                 this.deltaY = Math.min(12, this.deltaY);
                 if (this.y * scale > canvas.height - 33 * scale) {
                     this.y = canvas.height / scale - 33;
