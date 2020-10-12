@@ -93,7 +93,7 @@ class Bird {
         if (!gameOver) {
             AUDIO_TAP.currentTime = 0;
             AUDIO_TAP.play();
-            this.deltaY = -4.3;
+            this.deltaY = -4;
             gameRunning = true;
         }
     }
@@ -118,7 +118,6 @@ class Bird {
     }
 
     update() {
-        if (true) {
             if (mouseDown && !this.tapped) {
                 this.tap();
                 this.tapped = true;
@@ -128,7 +127,7 @@ class Bird {
             }
             if (gameRunning && !gameOver) {
                 this.y += this.deltaY;
-                this.deltaY += 0.31;
+                this.deltaY += 0.29=85;
                 this.deltaY = Math.min(12, this.deltaY);
                 if (this.y * scale > canvas.height - 33 * scale) {
                     this.y = canvas.height / scale - 33;
@@ -152,7 +151,7 @@ class Bird {
                 }
             }
 
-        }
+        
 
     }
 }
