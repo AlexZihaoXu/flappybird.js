@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Flappy Bird</title>
-    <link rel="icon" href="https://www.spriters-resource.com/resources/sheet_icons/59/62236.png">
+    <link rel="icon" href="https://img.pngio.com/flappy-bird-png-105-images-in-collection-page-2-flappy-bird-icon-256_256.png">
 </head>
 <body>
 <script>
