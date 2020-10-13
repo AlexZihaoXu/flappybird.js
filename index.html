@@ -20,8 +20,18 @@ canvas.style.display = 'block';
 let ctx = canvas.getContext('2d');
 
 let scale = 3;
+let best = 0;
 canvas.width = 143 * scale;
 canvas.height = 255 * scale;
+
+console.log(document.cookie.split(';'))
+for (let cookie of document.cookie.split(';') ) {
+    if (cookie.startsWith('best=')) {
+        best = parseInt(cookie.split('=')[1]);
+        break;
+    }
+}
+document.cookie = "best=" + best.toString() + ';';
 
 const NUMBER_POSES = [
     [288, 100, 294, 109],
@@ -101,16 +111,16 @@ class Bird {
     draw() {
         switch (Math.floor(gameFrame / 10) % 4) {
             case 0: // Down
-                ctx.drawImage(RES, 223, 124, 17, 12, 25 * scale, this.y * scale, 17 * scale, 12 * scale);
+                ctx.drawImage(RES, 223, 124, 17, 12, 25 * scale, (this.y - shake) * scale, 17 * scale, 12 * scale);
                 break;
             case 1: // Mid
-                ctx.drawImage(RES, 264, 90, 17, 12, 25 * scale, this.y * scale, 17 * scale, 12 * scale);
+                ctx.drawImage(RES, 264, 90, 17, 12, 25 * scale, (this.y - shake) * scale, 17 * scale, 12 * scale);
                 break;
             case 2: // Up
-                ctx.drawImage(RES, 264, 64, 17, 12, 25 * scale, this.y * scale, 17 * scale, 12 * scale);
+                ctx.drawImage(RES, 264, 64, 17, 12, 25 * scale, (this.y - shake) * scale, 17 * scale, 12 * scale);
                 break;
             case 3: // Mid
-                ctx.drawImage(RES, 264, 90, 17, 12, 25 * scale, this.y * scale, 17 * scale, 12 * scale);
+                ctx.drawImage(RES, 264, 90, 17, 12, 25 * scale, (this.y - shake) * scale, 17 * scale, 12 * scale);
                 break;
             default:
                 break
@@ -156,7 +166,6 @@ class Bird {
 }
 
 let pipes = [null, null, null];
-let pops = 0;
 bird = new Bird();
 
 
@@ -168,15 +177,12 @@ class Pipe {
     }
 
     draw() {
-        ctx.drawImage(RES, 302, 0, 26, 135, this.x * scale, (this.y - 40) * scale, 26 * scale, 135 * scale);
-        ctx.drawImage(RES, 330, 0, 26, 120, this.x * scale, (this.y + 160) * scale, 26 * scale, 120 * scale)
+        ctx.drawImage(RES, 302, 0, 26, 135, (this.x + shake*0.5) * scale, (this.y - 40) * scale, 26 * scale, 135 * scale);
+        ctx.drawImage(RES, 330, 0, 26, 120, (this.x + shake*0.5) * scale, (this.y + 160) * scale, 26 * scale, 120 * scale)
     }
 
     update() {
         this.x -= 0.8;
-        if (this.x < -26 * scale) {
-            pops++;
-        }
         // Collision Detection
         let box = {
             top: bird.y,
@@ -201,17 +207,24 @@ class Pipe {
         }
         if (box.left > self.right && !this.scored) {
             score++;
+            if (score > best) {
+                best = score;
+                newHighest = true;
+                document.cookie = "best=" + best.toString() + ';';
+            }
             AUDIO_POINT.play();
             this.scored = true;
         }
     }
 }
 
-let flashed = 99;
+let flash = 99;
 let boardY = -100;
-
-function drawNumber(deltaX = 0, deltaY = 0, absX = null) {
-    let num = score;
+let bgFrame = 0;
+let shake = 0;
+let newHighest = false;
+function drawNumber(deltaX = 0, deltaY = 0, absX = null, number=score) {
+    let num = number;
     let width = 0;
     let count = 0;
     while (num !== 0) {
@@ -226,7 +239,7 @@ function drawNumber(deltaX = 0, deltaY = 0, absX = null) {
     } else {
         baseX = absX - width;
     }
-    num = score;
+    num = number;
     let w, h, index;
     let i = 0;
     while (num !== 0) {
@@ -239,7 +252,7 @@ function drawNumber(deltaX = 0, deltaY = 0, absX = null) {
             RES, NUMBER_POSES[index][0], NUMBER_POSES[index][1], w, h, (baseX + width - i + deltaX) * scale, (20 + deltaY) * scale, w * scale, h * scale
         )
     }
-    if (score === 0) {
+    if (number === 0) {
         index = 0;
         w = NUMBER_POSES[index][2] - NUMBER_POSES[index][0] + 1;
         h = NUMBER_POSES[index][3] - NUMBER_POSES[index][1] + 1;
@@ -253,34 +266,38 @@ function drawNumber(deltaX = 0, deltaY = 0, absX = null) {
 
 function draw() {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(RES, 0, 0, 143, 255, 0, 0, 143 * scale, 255 * scale);
-
+    ctx.drawImage(RES, 0, 0, 143, 255, (-bgFrame%1430*0.1)*scale, shake*scale, 143 * scale, 255 * scale);
+    ctx.drawImage(RES, 0, 0, 143, 255, (-bgFrame%1430*0.1+143)*scale, shake*scale, 143 * scale, 255 * scale);
     for (const pipe of pipes) {
         if (pipe !== null)
             pipe.draw();
     }
     bird.draw();
+    ctx.drawImage(RES, 146, 0, 154, 56, -(bgFrame % 7 * scale), canvas.height - (22 + shake) * scale, 154 * scale, 56 * scale)
 
-    if (gameRunning) {
-        ctx.drawImage(RES, 146, 0, 154, 56, -(gameFrame % 7 * scale), canvas.height - 22 * scale, 154 * scale, 56 * scale)
-
-    } else {
-        ctx.drawImage(RES, 146, 0, 154, 56, 0, canvas.height - 22 * scale, 154 * scale, 56 * scale);
+    if (!gameRunning) {
+        ctx.drawImage(RES, 146, 0, 154, 56, 0, canvas.height - (22 + shake) * scale, 154 * scale, 56 * scale);
 
         if (!gameOver)
             ctx.drawImage(RES, 170, 121, 45, 50, 55 * scale, 120 * scale, 45 * scale, 50 * scale);
 
     }
-    if (gameOver && flashed > 20) {
-        flashed -= 8;
-        ctx.fillStyle = "#ffffff" + flashed.toString();
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
     if (!gameOver) {
         drawNumber()
     } else {
+        if (flash > 20) {
+            flash -= 8;
+            ctx.fillStyle = "#ffffff" + flash.toString();
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            shake = (gameFrame % 4 - 4) * 2;
+        } else {
+            shake = 0;
+        }
         ctx.drawImage(RES, 146, 58, 113, 58, (canvas.width / scale / 2 - 56) * scale, (boardY - 57) * scale, 112 * scale, 57 * scale)
         drawNumber(25, boardY - 60, 90);
+        drawNumber(25, boardY - 40, 90, best);
+        if (newHighest)
+            ctx.drawImage(RES, 146, 245, 16, 7, 82*scale, (boardY - 27.7) * scale, 15*scale, 6*scale)
         let i;
         if (score >= 40) {
             i = MEDAL_POSES[3];
@@ -306,6 +323,7 @@ function update() {
     canvas.height = 255 * scale;
     gameFrame++;
     if (gameRunning) {
+        bgFrame ++;
         for (const pipe of pipes) {
             if (pipe !== null)
                 pipe.update();
