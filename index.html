@@ -90,14 +90,6 @@ canvas.addEventListener("mousemove", function (evt) {
 window.addEventListener('resize', function(e){
     ctx.imageSmoothingEnabled = false;
 }, false)
-window.addEventListener('keydown', function(e){
-    if (e.keycode == 'space')
-        mouseDown=true;
-}, true);
-window.addEventListener('keyup', function(e){
-    if (e.keycode == 'space')
-        mouseDown=false;
-}, true);
 canvas.onselectstart = function () { return false; }
 
 class Bird {
@@ -111,7 +103,7 @@ class Bird {
         if (!gameOver) {
             AUDIO_TAP.currentTime = 0;
             AUDIO_TAP.play();
-            this.deltaY = -3.8;
+            this.deltaY = -3.5;
             gameRunning = true;
         }
     }
@@ -145,7 +137,7 @@ class Bird {
             }
             if (gameRunning && !gameOver) {
                 this.y += this.deltaY;
-                this.deltaY += 0.28;
+                this.deltaY += 0.25;
                 this.deltaY = Math.min(12, this.deltaY);
                 if (this.y * scale > canvas.height - 33 * scale) {
                     this.y = canvas.height / scale - 33;
