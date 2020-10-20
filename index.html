@@ -90,6 +90,14 @@ canvas.addEventListener("mousemove", function (evt) {
 window.addEventListener('resize', function(e){
     ctx.imageSmoothingEnabled = false;
 }, false)
+window.addEventListener('keydown', function(e){
+    if (e.keycode == 'space')
+        mouseDown=true;
+}, true);
+window.addEventListener('keyup', function(e){
+    if (e.keycode == 'space')
+        mouseDown=false;
+}, true);
 canvas.onselectstart = function () { return false; }
 
 class Bird {
